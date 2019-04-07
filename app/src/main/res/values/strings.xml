@@ -6,4 +6,12 @@
     <string name="action_edit">Edit</string>
     <string name="action_delete">Delete</string>
     <string name="action_save">Save</string>
+    <string name="name">Name</string>
+    <string name="tv_date">Дата рождения</string>
+    <string name="et_date_hint">Дата рождения</string>
+    <string name="et_date_caption">День рождения</string>
+    <string name="et_note_hint">Описане</string>
+    <string name="et_note_caption">Заметка</string>
+    <string name="avatar">avatar</string>
+    <string name="et_age">Возраст</string>
 </resources>

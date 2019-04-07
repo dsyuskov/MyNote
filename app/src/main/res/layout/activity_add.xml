@@ -1,14 +1,63 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
+<ScrollView
         xmlns:android="http://schemas.android.com/apk/res/android"
-        android:orientation="vertical"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
-
-    <android.support.v7.widget.RecyclerView
-            android:id="@+id/recycler_view"
+    <LinearLayout
+            android:orientation="vertical"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"/>
+            android:layout_height="wrap_content">
+        <LinearLayout
+                android:orientation="horizontal"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@color/colorPrimaryDark">
+            <ImageView
+                    android:id="@+id/iv_avatar"
+                    android:contentDescription="@string/avatar"
+                    android:padding="8dp"
+                    android:src="@mipmap/ic_launcher"
+                    android:layout_width="100dp"
+                    android:layout_height="100dp"/>
+            <EditText
+                    android:id="@+id/et_name"
+                    android:padding="8dp"
+                    android:textSize="24sp"
+                    android:hint="@string/name"
+                    android:inputType="textCapWords"
+                    android:layout_gravity="center_vertical"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="@color/colorPrimaryDark"/>
+        </LinearLayout>
+        <TextView
+                android:padding="8dp"
+                android:text="@string/et_date_caption"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@color/colorPrimary"/>
+        <EditText
+                android:id="@+id/et_date"
+                android:padding="16dp"
+                android:hint="@string/et_date_hint"
+                android:inputType="date"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@color/colorPrimaryDark"/>
+        <TextView
+                android:padding="8dp"
+                android:text="@string/et_note_caption"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@color/colorPrimary"/>
+        <EditText
+                android:id="@+id/et_note"
+                android:padding="16dp"
+                android:hint="@string/et_note_hint"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="text"
+                android:background="@color/colorPrimaryDark"/>
+    </LinearLayout>
+</ScrollView>
 
-
-</LinearLayout>
