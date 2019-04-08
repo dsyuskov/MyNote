@@ -11,10 +11,12 @@ object RealmHelper {
         }
     }
 
-    fun editDate(realm: Realm,id: String,date:String){
+    fun editToRealm(realm: Realm,itemNew: Item){
         realm.executeTransaction{
-            var item = realm.where<Item>().equalTo("id",id).findFirst()
-            item?.date = date
+            var item = realm.where<Item>().equalTo("id",itemNew.id).findFirst()
+            item?.date = itemNew.date
+            item?.name = itemNew.name
+            item?.note = itemNew.note
         }
 
     }

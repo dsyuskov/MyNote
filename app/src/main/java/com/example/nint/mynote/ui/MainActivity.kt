@@ -30,17 +30,11 @@ class MainActivity : AppCompatActivity() {
 
         realm = Realm.getDefaultInstance()
 
-        //initRecyclerView()
+        initRecyclerView()
         fab.setOnClickListener { view ->
-            val item = Item()
-            item.id = UUID.randomUUID().toString()
-            item.date = "23.03.1987"
-            item.name = "Int_21h"
-            item.note = "It is I"
-            //openAddActivity()
-            //openBrowseActivity()
-            RealmHelper.saveToRealm(realm,item)
-            initRecyclerView()
+            val intent = Intent(this@MainActivity, AddActivity::class.java)
+            intent.putExtra("ID","NEW")
+            startActivity(intent)
 
         }
     }

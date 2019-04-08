@@ -10,11 +10,13 @@ import com.example.nint.mynote.model.Item
 import com.example.nint.mynote.model.RealmHelper
 import io.realm.Realm
 import kotlinx.android.synthetic.main.activity_add.*
+import java.util.*
 
 class AddActivity: AppCompatActivity() {
     private lateinit var realm: Realm
     private lateinit var itemID:String
     private lateinit var item:Item
+    private var isNew = false
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -26,14 +28,16 @@ class AddActivity: AppCompatActivity() {
         realm = Realm.getDefaultInstance()
 
         var intent = intent
-        if (intent != null) {
-            itemID = intent.getStringExtra("ID")
+        itemID = intent.getStringExtra("ID")
 
-
+        if (!itemID.equals("NEW")) {
             item = RealmHelper.readToRealm(realm, itemID)!!
             et_name.setText(item?.name)
             et_date.setText(item?.date)
             et_note.setText(item?.note)
+        }else{
+            isNew = true
+            itemID = UUID.randomUUID().toString()
         }
     }
 
@@ -51,9 +55,19 @@ class AddActivity: AppCompatActivity() {
         val id = itemMenu?.itemId
         when(id){
             R.id.action_save ->{
+                var item = Item()
+                item.id = itemID
+                item.date = et_date.text.toString()
+                item.name = et_name.text.toString()
+                item.note = et_note.text.toString()
+                if (isNew){
+                    RealmHelper.saveToRealm(realm,item)
+                }else{
+                    RealmHelper.editToRealm(realm,item)
+                }
 
-                RealmHelper.editDate(realm,itemID,et_date.text.toString())
                 Toast.makeText(this,"Save",Toast.LENGTH_SHORT).show()
+                finish()
             }
         }
         return super.onOptionsItemSelected(itemMenu)

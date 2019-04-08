@@ -28,7 +28,6 @@ class RecyclerViewAdapter(val context:Context,val list: RealmResults<Item>): Rec
             var intent = Intent(context,BrowseActivity::class.java)
             intent.putExtra("ID",item?.id)
             context.startActivity(intent)
-
         }
 
     }
