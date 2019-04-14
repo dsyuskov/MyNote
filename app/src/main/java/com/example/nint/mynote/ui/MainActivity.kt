@@ -3,8 +3,9 @@ package com.example.nint.mynote.ui
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
-import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.LinearLayoutManager
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.DividerItemDecoration
+import androidx.recyclerview.widget.LinearLayoutManager
 import android.util.AttributeSet
 import android.view.Menu
 import android.view.MenuItem
@@ -20,7 +21,7 @@ import kotlinx.android.synthetic.main.activity_main.*
 import java.util.*
 
 
-class MainActivity : AppCompatActivity() {
+class MainActivity : AppCompatActivity(),SearchView.OnQueryTextListener {
     lateinit var mSearchView: SearchView
     lateinit var realm:Realm
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -45,8 +46,18 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun initRecyclerView(){
-        rv_list_items.layoutManager = LinearLayoutManager(this)
-        rv_list_items.adapter = RecyclerViewAdapter(this,RealmHelper.readToRealm(realm))
+        var list = RealmHelper.readToRealm(realm)
+        var mLayoutManager = androidx.recyclerview.widget.LinearLayoutManager(this)
+        mLayoutManager.scrollToPosition(RealmHelper.position)
+
+        rv_list_items.layoutManager = mLayoutManager
+        rv_list_items.adapter = RecyclerViewAdapter(this,list)
+        rv_list_items.addItemDecoration(
+            androidx.recyclerview.widget.DividerItemDecoration(
+                this,
+                androidx.recyclerview.widget.LinearLayoutManager.VERTICAL
+            )
+        )
     }
 
 
@@ -63,7 +74,17 @@ class MainActivity : AppCompatActivity() {
         // automatically handle clicks on the Home/Up button, so long
         // as you specify a parent activity in AndroidManifest.xml.
         return when (item.itemId) {
-            R.id.action_settings -> true
+            R.id.action_settings -> {
+                RealmHelper.saveToRealm(realm, Item(UUID.randomUUID().toString(),"Int",0,"INT"))
+                RealmHelper.saveToRealm(realm, Item(UUID.randomUUID().toString(),"Венера",0,"ВЕНЕРА"))
+                RealmHelper.saveToRealm(realm, Item(UUID.randomUUID().toString(),"Вика",0,"ВИКА"))
+                RealmHelper.saveToRealm(realm, Item(UUID.randomUUID().toString(),"Щербакова Таня",0,"ЩЕРБАКОВА ТАНЯ"))
+                RealmHelper.saveToRealm(realm, Item(UUID.randomUUID().toString(),"Ваня",0,"ВАНЯ"))
+                RealmHelper.saveToRealm(realm, Item(UUID.randomUUID().toString(),"Кирилл",0,"КИРИЛЛ"))
+                RealmHelper.saveToRealm(realm, Item(UUID.randomUUID().toString(),"Папа",0,"ПАПА"))
+                RealmHelper.saveToRealm(realm, Item(UUID.randomUUID().toString(),"Мама",0,"МАМА"))
+                true
+            }
             else -> super.onOptionsItemSelected(item)
         }
     }
@@ -72,5 +93,31 @@ class MainActivity : AppCompatActivity() {
         mSearchView.setIconifiedByDefault(true)
         //mSearchView.setOnQueryTextListener(this)
         mSearchView.setQueryHint("Search Here")
+        mSearchView.setOnQueryTextListener(this)
+
     }
+    override fun onQueryTextSubmit(query: String?): Boolean {
+
+     return true
+    }
+
+    override fun onQueryTextChange(newText: String?): Boolean {
+        var list = RealmHelper.readToRealm(realm,"nameInsensitive",newText!!.toUpperCase())
+        var mLayoutManager = androidx.recyclerview.widget.LinearLayoutManager(this)
+        mLayoutManager.scrollToPosition(RealmHelper.position)
+
+        rv_list_items.layoutManager = mLayoutManager
+        rv_list_items.adapter = RecyclerViewAdapter(this,list)
+        rv_list_items.addItemDecoration(
+            androidx.recyclerview.widget.DividerItemDecoration(
+                this,
+                androidx.recyclerview.widget.LinearLayoutManager.VERTICAL
+            )
+        )
+
+        return true
+    }
+
 }
+
+

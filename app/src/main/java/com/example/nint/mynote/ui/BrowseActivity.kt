@@ -1,14 +1,18 @@
 package com.example.nint.mynote.ui
 
 import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
-import android.support.v7.app.AppCompatActivity
+import androidx.appcompat.app.AppCompatActivity
 import android.view.Menu
 import android.view.MenuItem
+import com.example.nint.mynote.MyAppliction.Companion.dateToStr
+import com.example.nint.mynote.MyAppliction.Companion.diffDate
 import com.example.nint.mynote.R
 import com.example.nint.mynote.model.RealmHelper
 import io.realm.Realm
 import kotlinx.android.synthetic.main.activity_browse.*
+import java.util.*
 
 class BrowseActivity:AppCompatActivity() {
     lateinit var itemID:String
@@ -25,9 +29,10 @@ class BrowseActivity:AppCompatActivity() {
         itemID = intent.getStringExtra("ID")
         var item = RealmHelper.readToRealm(realm,itemID)
         tv_name.text = item?.name
-        tv_date.text = item?.date
+        tv_date.text = dateToStr(this, item?.date)
         tv_note.text = item?.note
-
+        tv_age.text = diffDate(item.date,Calendar.getInstance().timeInMillis).toString()
+        iv_avatar.setImageURI(Uri.parse(item.avatar))
     }
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
