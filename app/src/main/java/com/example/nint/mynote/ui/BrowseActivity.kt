@@ -1,11 +1,16 @@
 package com.example.nint.mynote.ui
 
+import android.app.Activity
+import android.content.DialogInterface
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import android.view.Menu
 import android.view.MenuItem
+import android.view.View
+import android.widget.Toast
+import androidx.appcompat.app.AlertDialog
 import com.example.nint.mynote.MyAppliction.Companion.dateToStr
 import com.example.nint.mynote.MyAppliction.Companion.diffDate
 import com.example.nint.mynote.R
@@ -32,7 +37,10 @@ class BrowseActivity:AppCompatActivity() {
         tv_date.text = dateToStr(this, item?.date)
         tv_note.text = item?.note
         tv_age.text = diffDate(item.date,Calendar.getInstance().timeInMillis).toString()
-        iv_avatar.setImageURI(Uri.parse(item.avatar))
+        if (item.avatar == "")
+            iv_avatar.setImageResource(R.mipmap.avatar)
+        else
+            iv_avatar.setImageURI(Uri.parse(item.avatar))
     }
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
@@ -50,8 +58,19 @@ class BrowseActivity:AppCompatActivity() {
 
         when(id){
             R.id.action_delete -> {
-                RealmHelper.removeToRealm(realm,itemID)
-                finish()
+                var builder = AlertDialog.Builder(this)
+                builder.setTitle("Удаление")
+                    .setMessage(R.string.dialog_delete)
+                    .setPositiveButton(R.string.ok){a,b ->
+                        RealmHelper.removeToRealm(realm,itemID)
+                        finish()
+                    }
+                    .setNegativeButton(R.string.cancel){a,b ->
+                        a.cancel()
+                    }
+
+                builder.show()
+
             }
             R.id.action_edit -> {
                 val intent = Intent(this@BrowseActivity, AddActivity::class.java)

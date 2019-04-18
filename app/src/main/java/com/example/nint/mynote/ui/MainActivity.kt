@@ -1,17 +1,11 @@
 package com.example.nint.mynote.ui
 
-import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.recyclerview.widget.DividerItemDecoration
-import androidx.recyclerview.widget.LinearLayoutManager
-import android.util.AttributeSet
 import android.view.Menu
 import android.view.MenuItem
-import android.view.View
 import android.widget.SearchView
-import android.widget.Toast
 import com.example.nint.mynote.R
 import com.example.nint.mynote.model.Item
 import com.example.nint.mynote.model.RealmHelper

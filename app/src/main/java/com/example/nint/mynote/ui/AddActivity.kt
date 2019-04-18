@@ -29,14 +29,22 @@ class AddActivity: AppCompatActivity() {
     private lateinit var itemID:String
     private lateinit var item:Item
     private var isNew = false
-    private val date = Calendar.getInstance()
+    private var date = Calendar.getInstance()
     private var avatarURI:String =""
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_add)
         iv_avatar.setOnClickListener {
-           CropImage.activity(null).setGuidelines(CropImageView.Guidelines.ON).start(this)
+            CropImage.activity(null)
+                .setCropShape(CropImageView.CropShape.OVAL)
+                .setFixAspectRatio(true)
+                .setGuidelines(CropImageView.Guidelines.ON).start(this)
+        }
+
+        et_date.setOnLongClickListener {
+            setDate(it)
+            true
         }
 
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
@@ -49,19 +57,20 @@ class AddActivity: AppCompatActivity() {
         if (!itemID.equals("NEW")) {
             item = RealmHelper.readToRealm(realm, itemID)
             et_name.setText(item?.name)
-            et_date.setText(dateToStr(this,item?.date))
+            et_date.setText(dateToStr(this, item?.date))
             et_note.setText(item?.note)
-            iv_avatar.setImageURI(Uri.parse(item.avatar))
-        }else{
+
+            if (item.avatar == "")
+                iv_avatar.setImageResource(R.mipmap.avatar)
+            else
+                iv_avatar.setImageURI(Uri.parse(item.avatar))
+
+            date.timeInMillis = item.date
+        } else {
             isNew = true
             itemID = UUID.randomUUID().toString()
         }
-
-        et_date.setOnLongClickListener{
-                setDate(it)
-            true
-            }
-        }
+    }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         // handle result of CropImageActivity
@@ -70,10 +79,6 @@ class AddActivity: AppCompatActivity() {
             if (resultCode == Activity.RESULT_OK) {
                 avatarURI = result.uri.toString()
                 iv_avatar.setImageURI(result.uri)
-                Toast.makeText(
-                    this, "Cropping successful, Sample: " + result.sampleSize, Toast.LENGTH_LONG
-                )
-                    .show()
             } else if (resultCode == CropImage.CROP_IMAGE_ACTIVITY_RESULT_ERROR_CODE) {
                 Toast.makeText(this, "Cropping failed: " + result.error, Toast.LENGTH_LONG).show()
             }
@@ -117,8 +122,9 @@ class AddActivity: AppCompatActivity() {
     }
 
     private fun setDate(v: View) {
+
         DatePickerDialog(
-            this, d ,
+            this, d,
             date.get(Calendar.YEAR),
             date.get(Calendar.MONTH),
             date.get(Calendar.DAY_OF_MONTH)

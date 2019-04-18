@@ -14,7 +14,7 @@ import kotlin.collections.ArrayList
 class RecyclerViewAdapter(val context:Context,val list: ArrayList<ItemRecyclerView>): androidx.recyclerview.widget.RecyclerView.Adapter<MyViewHolder>() {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): MyViewHolder {
-        val view= LayoutInflater.from(context).inflate(R.layout.item_note,parent,false)
+        val view = LayoutInflater.from(context).inflate(R.layout.item_note,parent,false)
         return MyViewHolder(view)
     }
 
@@ -27,11 +27,16 @@ class RecyclerViewAdapter(val context:Context,val list: ArrayList<ItemRecyclerVi
         holder.date.text = MyAppliction.dateToStr(context,item.date)
         holder.name.text = item?.name
         holder.age.text = MyAppliction.diffDate(item.date, Calendar.getInstance().timeInMillis).toString()
-        holder.avatar.setImageURI(Uri.parse(item?.avatar))
+        if (item.avatar == "")
+            holder.avatar.setImageResource(R.mipmap.avatar)
+        else
+            holder.avatar.setImageURI(Uri.parse(item.avatar))
+
         holder.itemView.setOnClickListener {
             var intent = Intent(context,BrowseActivity::class.java)
             intent.putExtra("ID",item?.id)
             context.startActivity(intent)
         }
     }
+
 }
