@@ -36,7 +36,6 @@ class MainActivity : AppCompatActivity(),SearchView.OnQueryTextListener {
             val intent = Intent(this@MainActivity, AddActivity::class.java)
             intent.putExtra("ID","NEW")
             startActivity(intent)
-
         }
     }
 
@@ -60,7 +59,6 @@ class MainActivity : AppCompatActivity(),SearchView.OnQueryTextListener {
         )
     }
 
-
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         // Inflate the menu; this adds items to the action bar if it is present.
         menuInflater.inflate(R.menu.menu_main, menu)
@@ -75,15 +73,11 @@ class MainActivity : AppCompatActivity(),SearchView.OnQueryTextListener {
         // as you specify a parent activity in AndroidManifest.xml.
         return when (item.itemId) {
             R.id.action_settings -> {
-                RealmHelper.saveToRealm(realm, Item(UUID.randomUUID().toString(),"Int",0,"INT"))
-                RealmHelper.saveToRealm(realm, Item(UUID.randomUUID().toString(),"Венера",0,"ВЕНЕРА"))
-                RealmHelper.saveToRealm(realm, Item(UUID.randomUUID().toString(),"Вика",0,"ВИКА"))
-                RealmHelper.saveToRealm(realm, Item(UUID.randomUUID().toString(),"Щербакова Таня",0,"ЩЕРБАКОВА ТАНЯ"))
-                RealmHelper.saveToRealm(realm, Item(UUID.randomUUID().toString(),"Ваня",0,"ВАНЯ"))
-                RealmHelper.saveToRealm(realm, Item(UUID.randomUUID().toString(),"Кирилл",0,"КИРИЛЛ"))
-                RealmHelper.saveToRealm(realm, Item(UUID.randomUUID().toString(),"Папа",0,"ПАПА"))
-                RealmHelper.saveToRealm(realm, Item(UUID.randomUUID().toString(),"Мама",0,"МАМА"))
-                true
+                //startActivity(Intent(this@MainActivity,AddActivity::class.java))
+                val intent = Intent(this@MainActivity, SettingsActivity::class.java)
+                intent.putExtra("ID","NEW")
+                startActivity(intent)
+                return true
             }
             else -> super.onOptionsItemSelected(item)
         }

@@ -24,6 +24,6 @@ class ExampleUnitTest {
         assertEquals(MyAppliction.monthDate(1555140755821), 4)
         assertEquals(MyAppliction.monthDate(1556696705109), 5)
         assertEquals(MyAppliction.monthDate(951814083298), 2)
-
     }
+
 }

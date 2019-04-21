@@ -6,8 +6,8 @@ import android.text.format.DateUtils
 import com.example.nint.mynote.model.ItemRecyclerView
 import io.realm.Realm
 import io.realm.RealmConfiguration
-import java.util.Calendar
 import java.text.SimpleDateFormat
+import java.util.*
 
 class MyAppliction: Application() {
     override fun onCreate() {
@@ -20,10 +20,26 @@ class MyAppliction: Application() {
     }
 
     companion object {
-        fun dateToStr(context: Context, date: Long) = DateUtils.formatDateTime(
-            context, date,
-            DateUtils.FORMAT_NUMERIC_DATE or DateUtils.FORMAT_SHOW_YEAR
-        )
+        const val APP_PREFERENCES_SOUND_ENABLED = "SOUND_ENABLED"
+        const val APP_PREFERENCES_VIBRATION_ENABLED = "VIBRATION_ENABLED"
+        const val APP_PREFERENCES_TIME_NOTIFICATION = "TIME_NOTIFICATION"
+
+        fun dateToStr(date: Long):String{
+            val dateFormated = SimpleDateFormat("dd.MM.yyyy")
+            return dateFormated.format(date)
+        }
+
+        fun timeToStr(time: Long):String {
+            val dateFormated = SimpleDateFormat("HH:mm")
+            return dateFormated.format(time)
+        }
+
+        fun strDateToLong(str:String):Long{
+            val date: Date
+            val formatter = SimpleDateFormat("dd.MM.yyyy")
+            date = formatter.parse(str) as Date
+            return date.time
+        }
 
         fun dayDate(date:Long):Int{
             var c = Calendar.getInstance()

@@ -22,6 +22,7 @@ class BrowseActivity:AppCompatActivity() {
         setContentView(R.layout.activity_browse)
 
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
+        supportActionBar?.title = "Информация об именнинике"
 
         realm = Realm.getDefaultInstance()
 
@@ -29,7 +30,7 @@ class BrowseActivity:AppCompatActivity() {
         itemID = intent.getStringExtra("ID")
         var item = RealmHelper.readToRealm(realm,itemID)
         tv_name.text = item?.name
-        tv_date.text = dateToStr(this, item?.date)
+        tv_date.text = dateToStr(item?.date)
         tv_note.text = item?.note
         tv_age.text = diffDate(item.date,Calendar.getInstance().timeInMillis).toString()
         iv_avatar.setImageURI(Uri.parse(item.avatar))

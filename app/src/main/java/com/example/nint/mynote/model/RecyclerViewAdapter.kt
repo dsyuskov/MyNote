@@ -24,7 +24,7 @@ class RecyclerViewAdapter(val context:Context,val list: ArrayList<ItemRecyclerVi
 
     override fun onBindViewHolder(holder: MyViewHolder, position: Int) {
         var item = list[position]
-        holder.date.text = MyAppliction.dateToStr(context,item.date)
+        holder.date.text = MyAppliction.dateToStr(item.date)
         holder.name.text = item?.name
         holder.age.text = MyAppliction.diffDate(item.date, Calendar.getInstance().timeInMillis).toString()
         holder.avatar.setImageURI(Uri.parse(item?.avatar))
