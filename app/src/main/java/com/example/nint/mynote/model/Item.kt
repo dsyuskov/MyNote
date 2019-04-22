@@ -14,7 +14,7 @@ open class Item(): RealmObject() {
     var date:Long = 0
     var note:String = ""
     var nameInsensitive:String = ""
-    var avatar:String = ""
+    var avatar:String = "@mipmap/avatar"
 
     constructor(id:String,name:String,date:Long,nameInsensitive:String):this(){
         this.id = id
