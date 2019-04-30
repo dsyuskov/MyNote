@@ -1,10 +1,12 @@
 package com.example.nint.mynote.ui
 
 import android.app.Activity
+import android.content.Context
 import android.content.DialogInterface
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
+import android.os.Environment
 import androidx.appcompat.app.AppCompatActivity
 import android.view.Menu
 import android.view.MenuItem
@@ -17,6 +19,7 @@ import com.example.nint.mynote.R
 import com.example.nint.mynote.model.RealmHelper
 import io.realm.Realm
 import kotlinx.android.synthetic.main.activity_browse.*
+import java.io.File
 import java.util.*
 
 class BrowseActivity:AppCompatActivity() {
@@ -64,6 +67,7 @@ class BrowseActivity:AppCompatActivity() {
                     .setMessage(R.string.dialog_delete)
                     .setPositiveButton(R.string.ok){a,b ->
                         RealmHelper.removeToRealm(realm,itemID)
+                        File(getImagePath(itemID).path).delete()
                         finish()
                     }
                     .setNegativeButton(R.string.cancel){a,b ->
@@ -82,6 +86,11 @@ class BrowseActivity:AppCompatActivity() {
         }
 
         return super.onOptionsItemSelected(item)
+    }
+
+    fun getImagePath(id:String):Uri{
+        var dir = this.getDir(Environment.DIRECTORY_PICTURES, Context.MODE_PRIVATE)
+        return Uri.parse("file://"+dir.path+"/"+id+".jpg")
     }
 
     override fun onDestroy() {
