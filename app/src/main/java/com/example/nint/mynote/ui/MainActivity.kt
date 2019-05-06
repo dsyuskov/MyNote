@@ -28,7 +28,8 @@ import java.nio.file.DirectoryIteratorException
 
 
 class MainActivity : AppCompatActivity(),SearchView.OnQueryTextListener {
-    val REQUEST_DIRECTORY = 0
+    val DIRECTORY_IMPORT = 0
+    val DIRECTORY_EXPORT = 1
     lateinit var mSearchView: SearchView
     lateinit var realm:Realm
     var pathForBackup = ""
@@ -79,6 +80,15 @@ class MainActivity : AppCompatActivity(),SearchView.OnQueryTextListener {
         // Handle action bar Item clicks here. The action bar will
         // automatically handle clicks on the Home/Up button, so long
         // as you specify a parent activity in AndroidManifest.xml.
+        val intent = Intent(this@MainActivity,DirectoryChooserActivity::class.java)
+        val config = DirectoryChooserConfig.builder()
+            .newDirectoryName("MyNote")
+            .allowReadOnlyDirectory(true)
+            .allowNewDirectoryNameModification(true)
+            .build()
+
+        intent.putExtra(DirectoryChooserActivity.EXTRA_CONFIG,config)
+
         return when (item.itemId) {
             R.id.action_settings -> {
                 //startActivity(Intent(this@MainActivity,AddActivity::class.java))
@@ -87,20 +97,16 @@ class MainActivity : AppCompatActivity(),SearchView.OnQueryTextListener {
                 startActivity(intent)
                 return true
             }
-            R.id.action_import ->{
-                val intent = Intent(this@MainActivity,DirectoryChooserActivity::class.java)
-                val config = DirectoryChooserConfig.builder()
-                    .newDirectoryName("MyNote")
-                    .allowReadOnlyDirectory(true)
-                    .allowNewDirectoryNameModification(true)
-                    .build()
-
-                intent.putExtra(DirectoryChooserActivity.EXTRA_CONFIG,config)
-
-                startActivityForResult(intent,REQUEST_DIRECTORY)
-                //Toast.makeText(this,getListFile(),Toast.LENGTH_LONG).show()
+            R.id.action_import->{
+                startActivityForResult(intent,DIRECTORY_IMPORT)
                 return true
             }
+            R.id.action_export ->{
+
+                startActivityForResult(intent,DIRECTORY_EXPORT)
+                return true
+            }
+
             R.id.action_help ->{
                 if (myBackup( this.getDir(Environment.DIRECTORY_PICTURES, Context.MODE_PRIVATE).path, this.getDir("backup", Context.MODE_PRIVATE).path)){
                     Toast.makeText(this,"Копирование завершено",Toast.LENGTH_LONG).show()
@@ -120,27 +126,35 @@ class MainActivity : AppCompatActivity(),SearchView.OnQueryTextListener {
         Log.d("MYTAG","onActivityresult")
         Log.d("MYTAG","request_code="+requestCode.toString())
 
-        if (requestCode == REQUEST_DIRECTORY){
-            Log.d("MYTAG","request_code"+requestCode.toString())
-            if (resultCode == DirectoryChooserActivity.RESULT_CODE_DIR_SELECTED) {
-                pathForBackup = data!!.getStringExtra(DirectoryChooserActivity.RESULT_SELECTED_DIR)
-                Log.d("MYTAG",this.getDir(Environment.DIRECTORY_PICTURES, Context.MODE_PRIVATE).path)
-                Log.d("MYTAG",pathForBackup)
-                myBackup( this.getDir(Environment.DIRECTORY_PICTURES, Context.MODE_PRIVATE).path,
-                    pathForBackup)
-            } else {
-                // Nothing selected
+        when(requestCode) {
+            DIRECTORY_EXPORT -> {
+                Log.d("MYTAG","request_code"+requestCode.toString())
+                if (resultCode == DirectoryChooserActivity.RESULT_CODE_DIR_SELECTED) {
+                    pathForBackup = data!!.getStringExtra(DirectoryChooserActivity.RESULT_SELECTED_DIR)
+                    Log.d("MYTAG",this.getDir(Environment.DIRECTORY_PICTURES, Context.MODE_PRIVATE).path)
+                    Log.d("MYTAG",pathForBackup)
+
+                    if (myBackup( this.getDir(Environment.DIRECTORY_PICTURES, Context.MODE_PRIVATE).path, pathForBackup))
+                        Log.d("MYTAG","copy OK")
+                } else {
+                    // Nothing selected
+                }
+            }
+            DIRECTORY_IMPORT -> {
+                Toast.makeText(this,"Toast",Toast.LENGTH_LONG).show()
             }
         }
     }
     fun myBackup(oldPath:String,newPath:String):Boolean{
         val old = File(oldPath)
         val new = File(newPath)
-        if (clearBackupDir(new))
-            return old.copyRecursively(new)
-        else
-            return false
+        val data = File(newPath+"/backup")
+        data.writeText(RealmHelper.exportRealmToJson(realm))
+
+        return old.copyRecursively(new,true)
     }
+
+
     fun clearBackupDir(dir:File):Boolean{
         try {
             for(tempFile in dir.listFiles()){

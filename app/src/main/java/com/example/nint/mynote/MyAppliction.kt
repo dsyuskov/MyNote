@@ -1,13 +1,20 @@
 package com.example.nint.mynote
 
-import android.app.Application
+import android.app.*
 import android.content.Context
-import android.text.format.DateUtils
-import com.example.nint.mynote.model.ItemRecyclerView
+import android.content.Intent
+import android.graphics.Bitmap
+import android.net.Uri
+import androidx.core.app.NotificationCompat
+import androidx.core.content.ContextCompat.getSystemService
+import com.example.nint.mynote.ui.MainActivity
 import io.realm.Realm
 import io.realm.RealmConfiguration
 import java.text.SimpleDateFormat
 import java.util.*
+
+
+
 
 class MyAppliction: Application() {
     override fun onCreate() {
@@ -65,6 +72,23 @@ class MyAppliction: Application() {
                 if (d2.get(Calendar.DAY_OF_MONTH) < d1.get(Calendar.DAY_OF_MONTH))
                     result--
             return result
+        }
+
+        fun notifi(context: Context,title:String,message:String,icon:String){
+            var builder = NotificationCompat.Builder(context)
+                //.setSmallIcon()
+
+                .setContentTitle(title)
+                .setContentText(message)
+                .setDefaults(Notification.DEFAULT_VIBRATE)
+            var intent = Intent(context, MainActivity::class.java)
+            var stackBuilder = TaskStackBuilder.create(context)
+            stackBuilder.addParentStack(MainActivity::class.java)
+            stackBuilder.addNextIntent(intent)
+            var resultPendingIntent = stackBuilder.getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT)
+            builder.setContentIntent(resultPendingIntent)
+            val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+            notificationManager.notify(Random(10).nextInt(),builder.build())
         }
 
     }

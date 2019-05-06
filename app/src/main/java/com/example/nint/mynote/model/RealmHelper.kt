@@ -1,6 +1,9 @@
 package com.example.nint.mynote.model
 
+import android.util.Log
 import com.example.nint.mynote.MyAppliction
+import com.google.gson.Gson
+import com.google.gson.GsonBuilder
 import io.realm.Case
 import io.realm.Realm
 import io.realm.RealmResults
@@ -28,7 +31,12 @@ object RealmHelper {
         }
     }
 
-    //fun readToRealm(realm: Realm) = realm.where<Item>().findAll()
+    fun exportRealmToJson(realm: Realm):String{
+        val realmResult = realm.where<Item>().findAll()
+        var result = realm.copyFromRealm(realmResult)
+        val gson = Gson()
+        return gson.toJson(result)
+    }
 
     fun readToRealm(realm: Realm): ArrayList<ItemRecyclerView> {
         var result = realmToArray(realm.where<Item>().findAll())

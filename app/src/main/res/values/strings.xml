@@ -25,5 +25,6 @@
     <string name="cancel">Отмена</string>
     <string name="dialog_delete">Вы действительно хотите удалить эту запись?</string>
     <string name="action_import">Импорт</string>
+    <string name="action_export">Экспорт</string>
 
 </resources>
