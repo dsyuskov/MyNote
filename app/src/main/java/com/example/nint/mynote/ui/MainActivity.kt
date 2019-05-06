@@ -13,31 +13,37 @@ import android.view.MenuItem
 import android.widget.SearchView
 import android.widget.Toast
 import com.example.nint.mynote.R
-import com.example.nint.mynote.model.Item
 import com.example.nint.mynote.model.RealmHelper
 import com.example.nint.mynote.model.RecyclerViewAdapter
+import com.rustamg.filedialogs.FileDialog
 import io.realm.Realm
 import kotlinx.android.synthetic.main.activity_main.*
 import java.io.File
-import android.content.res.AssetManager
+import com.rustamg.filedialogs.OpenFileDialog
 import net.rdrei.android.dirchooser.DirectoryChooserActivity
-import net.rdrei.android.dirchooser.DirectoryChooserConfig
-import java.io.IOException
 import java.lang.Exception
-import java.nio.file.DirectoryIteratorException
 
 
-class MainActivity : AppCompatActivity(),SearchView.OnQueryTextListener {
+
+class MainActivity : AppCompatActivity(),SearchView.OnQueryTextListener,FileDialog.OnFileSelectedListener {
+    override fun onFileSelected(dialog: FileDialog?, file: File?) {
+        Toast.makeText(this,file?.path,Toast.LENGTH_LONG).show()
+    }
+
     val REQUEST_DIRECTORY = 0
     lateinit var mSearchView: SearchView
     lateinit var realm:Realm
     var pathForBackup = ""
+
+    lateinit var openFileDialog: OpenFileDialog
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         setSupportActionBar(toolbar)
 
         realm = Realm.getDefaultInstance()
+        openFileDialog = OpenFileDialog()
+
 
         initRecyclerView()
         fab.setOnClickListener { view ->
@@ -45,6 +51,7 @@ class MainActivity : AppCompatActivity(),SearchView.OnQueryTextListener {
             intent.putExtra("ID","NEW")
             startActivity(intent)
         }
+
     }
 
     override fun onResume() {
@@ -88,6 +95,7 @@ class MainActivity : AppCompatActivity(),SearchView.OnQueryTextListener {
                 return true
             }
             R.id.action_import ->{
+                /*
                 val intent = Intent(this@MainActivity,DirectoryChooserActivity::class.java)
                 val config = DirectoryChooserConfig.builder()
                     .newDirectoryName("MyNote")
@@ -99,6 +107,10 @@ class MainActivity : AppCompatActivity(),SearchView.OnQueryTextListener {
 
                 startActivityForResult(intent,REQUEST_DIRECTORY)
                 //Toast.makeText(this,getListFile(),Toast.LENGTH_LONG).show()
+                */
+
+                openFileDialog.show(getSupportFragmentManager(),"OpenFile")
+
                 return true
             }
             R.id.action_help ->{

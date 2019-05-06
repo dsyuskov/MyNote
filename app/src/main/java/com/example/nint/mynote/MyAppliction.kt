@@ -2,6 +2,8 @@ package com.example.nint.mynote
 
 import android.app.Application
 import android.content.Context
+import android.net.Uri
+import android.os.Environment
 import android.text.format.DateUtils
 import com.example.nint.mynote.model.ItemRecyclerView
 import io.realm.Realm
