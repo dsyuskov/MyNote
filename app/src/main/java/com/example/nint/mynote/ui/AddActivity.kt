@@ -77,7 +77,7 @@ class AddActivity: AppCompatActivity() {
             true
             }
         }
-
+    //при изменении автарка не меняется
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         // handle result of CropImageActivity
         if (requestCode == CropImage.CROP_IMAGE_ACTIVITY_REQUEST_CODE) {

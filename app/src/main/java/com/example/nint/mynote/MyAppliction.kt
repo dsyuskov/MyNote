@@ -1,24 +1,18 @@
 package com.example.nint.mynote
 
 import android.app.Application
+import android.app.Notification
+import android.app.NotificationManager
+import android.app.PendingIntent
 import android.content.Context
-import android.net.Uri
-import android.os.Environment
-import android.text.format.DateUtils
-import com.example.nint.mynote.model.ItemRecyclerView
 import android.content.Intent
-import android.graphics.Bitmap
-import android.net.Uri
 import androidx.core.app.NotificationCompat
-import androidx.core.content.ContextCompat.getSystemService
+import androidx.core.app.TaskStackBuilder
 import com.example.nint.mynote.ui.MainActivity
 import io.realm.Realm
 import io.realm.RealmConfiguration
 import java.text.SimpleDateFormat
 import java.util.*
-
-
-
 
 class MyAppliction: Application() {
     override fun onCreate() {

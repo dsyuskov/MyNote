@@ -1,41 +1,56 @@
 package com.example.nint.mynote.ui
 
+
+import android.app.FragmentManager
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import android.os.Environment
-import android.provider.MediaStore
 import android.util.Log
-import androidx.appcompat.app.AppCompatActivity;
 import android.view.Menu
 import android.view.MenuItem
 import android.widget.SearchView
 import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
+import com.example.nint.mynote.MySaveFileDialog
 import com.example.nint.mynote.R
 import com.example.nint.mynote.model.RealmHelper
 import com.example.nint.mynote.model.RecyclerViewAdapter
 import com.rustamg.filedialogs.FileDialog
+import com.rustamg.filedialogs.OpenFileDialog
 import io.realm.Realm
 import kotlinx.android.synthetic.main.activity_main.*
 import java.io.File
-import com.rustamg.filedialogs.OpenFileDialog
-import net.rdrei.android.dirchooser.DirectoryChooserActivity
+import java.io.OutputStream
+import java.io.OutputStreamWriter
 import java.lang.Exception
+import java.nio.file.Files
+import java.nio.file.StandardOpenOption
 
 
+class MainActivity : AppCompatActivity(),SearchView.OnQueryTextListener, FileDialog.OnFileSelectedListener {
 
-class MainActivity : AppCompatActivity(),SearchView.OnQueryTextListener,FileDialog.OnFileSelectedListener {
-    override fun onFileSelected(dialog: FileDialog?, file: File?) {
-        Toast.makeText(this,file?.path,Toast.LENGTH_LONG).show()
-    }
 
-    val REQUEST_DIRECTORY = 0
     lateinit var mSearchView: SearchView
     lateinit var realm:Realm
     var pathForBackup = ""
-
+    lateinit var exportFile:File
+    lateinit var importFile:File
     lateinit var openFileDialog: OpenFileDialog
+    lateinit var saveFileDialog: MySaveFileDialog
+
+    override fun onFileSelected(dialog: FileDialog?, file: File?) {
+        if(dialog == openFileDialog){
+            Toast.makeText(this,"open",Toast.LENGTH_LONG).show()
+        }
+        if(dialog == saveFileDialog){
+            myBackup(file!!)
+            Toast.makeText(this,"save",Toast.LENGTH_LONG).show()
+        }
+
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -43,7 +58,7 @@ class MainActivity : AppCompatActivity(),SearchView.OnQueryTextListener,FileDial
 
         realm = Realm.getDefaultInstance()
         openFileDialog = OpenFileDialog()
-
+        saveFileDialog = MySaveFileDialog()
 
         initRecyclerView()
         fab.setOnClickListener { view ->
@@ -51,7 +66,6 @@ class MainActivity : AppCompatActivity(),SearchView.OnQueryTextListener,FileDial
             intent.putExtra("ID","NEW")
             startActivity(intent)
         }
-
     }
 
     override fun onResume() {
@@ -94,38 +108,24 @@ class MainActivity : AppCompatActivity(),SearchView.OnQueryTextListener,FileDial
                 startActivity(intent)
                 return true
             }
-            R.id.action_import->{
-                startActivityForResult(intent,DIRECTORY_IMPORT)
+            R.id.action_export->{
+                val args = Bundle()
+                args.putString(FileDialog.EXTENSION,".mnb")
+                args.putString(MySaveFileDialog.DEFAULT_FILE,"MyNoteBackup")
+                saveFileDialog.arguments = args
+                saveFileDialog.show(supportFragmentManager,"Save a file")
                 return true
             }
-            R.id.action_export ->{
+
             R.id.action_import ->{
-                /*
-                val intent = Intent(this@MainActivity,DirectoryChooserActivity::class.java)
-                val config = DirectoryChooserConfig.builder()
-                    .newDirectoryName("MyNote")
-                    .allowReadOnlyDirectory(true)
-                    .allowNewDirectoryNameModification(true)
-                    .build()
-
-                startActivityForResult(intent,DIRECTORY_EXPORT)
-                intent.putExtra(DirectoryChooserActivity.EXTRA_CONFIG,config)
-
-                startActivityForResult(intent,REQUEST_DIRECTORY)
-                //Toast.makeText(this,getListFile(),Toast.LENGTH_LONG).show()
-                */
-
-                openFileDialog.show(getSupportFragmentManager(),"OpenFile")
-
+                val args = Bundle()
+                args.putString(FileDialog.EXTENSION,"mnb")
+                openFileDialog.arguments = args
+                openFileDialog.show(supportFragmentManager,"Open a file")
                 return true
             }
 
             R.id.action_help ->{
-                if (myBackup( this.getDir(Environment.DIRECTORY_PICTURES, Context.MODE_PRIVATE).path, this.getDir("backup", Context.MODE_PRIVATE).path)){
-                    Toast.makeText(this,"Копирование завершено",Toast.LENGTH_LONG).show()
-                }else{
-                    Toast.makeText(this,"Ошибка копирования",Toast.LENGTH_LONG).show()
-                }
 
                 return true
             }
@@ -133,33 +133,7 @@ class MainActivity : AppCompatActivity(),SearchView.OnQueryTextListener,FileDial
         }
     }
 
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
 
-        Log.d("MYTAG","onActivityresult")
-        Log.d("MYTAG","request_code="+requestCode.toString())
-
-        if (requestCode == REQUEST_DIRECTORY){
-            Log.d("MYTAG","request_code"+requestCode.toString())
-            if (resultCode == DirectoryChooserActivity.RESULT_CODE_DIR_SELECTED) {
-                pathForBackup = data!!.getStringExtra(DirectoryChooserActivity.RESULT_SELECTED_DIR)
-                Log.d("MYTAG",this.getDir(Environment.DIRECTORY_PICTURES, Context.MODE_PRIVATE).path)
-                Log.d("MYTAG",pathForBackup)
-                myBackup( this.getDir(Environment.DIRECTORY_PICTURES, Context.MODE_PRIVATE).path,
-                    pathForBackup)
-            } else {
-                // Nothing selected
-            }
-        }
-    }
-    fun myBackup(oldPath:String,newPath:String):Boolean{
-        val old = File(oldPath)
-        val new = File(newPath)
-        if (clearBackupDir(new))
-            return old.copyRecursively(new)
-        else
-            return false
-    }
     fun clearBackupDir(dir:File):Boolean{
         try {
             for(tempFile in dir.listFiles()){
@@ -170,19 +144,19 @@ class MainActivity : AppCompatActivity(),SearchView.OnQueryTextListener,FileDial
             Log.d("MYTAG","File is not clear")
         }
         return false
-
     }
 
 
-    fun getListFile():String{
-        var result= ""
-        var dir = this.getDir("backup", Context.MODE_PRIVATE)
+    fun myBackup(file:File){
+
+        var dir = this.getDir(Environment.DIRECTORY_PICTURES, Context.MODE_PRIVATE)
 
         var list = dir.listFiles()
+        var b = file.outputStream()
         for(a in list){
-            result += a.toString()+";"
+            b.write(a.readBytes())
         }
-        return result
+        b.close()
     }
 
     private fun setupSearchView() {
