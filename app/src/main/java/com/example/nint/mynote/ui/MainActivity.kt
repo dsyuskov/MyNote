@@ -13,32 +13,37 @@ import android.view.MenuItem
 import android.widget.SearchView
 import android.widget.Toast
 import com.example.nint.mynote.R
-import com.example.nint.mynote.model.Item
 import com.example.nint.mynote.model.RealmHelper
 import com.example.nint.mynote.model.RecyclerViewAdapter
+import com.rustamg.filedialogs.FileDialog
 import io.realm.Realm
 import kotlinx.android.synthetic.main.activity_main.*
 import java.io.File
-import android.content.res.AssetManager
+import com.rustamg.filedialogs.OpenFileDialog
 import net.rdrei.android.dirchooser.DirectoryChooserActivity
-import net.rdrei.android.dirchooser.DirectoryChooserConfig
-import java.io.IOException
 import java.lang.Exception
-import java.nio.file.DirectoryIteratorException
 
 
-class MainActivity : AppCompatActivity(),SearchView.OnQueryTextListener {
-    val DIRECTORY_IMPORT = 0
-    val DIRECTORY_EXPORT = 1
+
+class MainActivity : AppCompatActivity(),SearchView.OnQueryTextListener,FileDialog.OnFileSelectedListener {
+    override fun onFileSelected(dialog: FileDialog?, file: File?) {
+        Toast.makeText(this,file?.path,Toast.LENGTH_LONG).show()
+    }
+
+    val REQUEST_DIRECTORY = 0
     lateinit var mSearchView: SearchView
     lateinit var realm:Realm
     var pathForBackup = ""
+
+    lateinit var openFileDialog: OpenFileDialog
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         setSupportActionBar(toolbar)
 
         realm = Realm.getDefaultInstance()
+        openFileDialog = OpenFileDialog()
+
 
         initRecyclerView()
         fab.setOnClickListener { view ->
@@ -46,6 +51,7 @@ class MainActivity : AppCompatActivity(),SearchView.OnQueryTextListener {
             intent.putExtra("ID","NEW")
             startActivity(intent)
         }
+
     }
 
     override fun onResume() {
@@ -80,15 +86,6 @@ class MainActivity : AppCompatActivity(),SearchView.OnQueryTextListener {
         // Handle action bar Item clicks here. The action bar will
         // automatically handle clicks on the Home/Up button, so long
         // as you specify a parent activity in AndroidManifest.xml.
-        val intent = Intent(this@MainActivity,DirectoryChooserActivity::class.java)
-        val config = DirectoryChooserConfig.builder()
-            .newDirectoryName("MyNote")
-            .allowReadOnlyDirectory(true)
-            .allowNewDirectoryNameModification(true)
-            .build()
-
-        intent.putExtra(DirectoryChooserActivity.EXTRA_CONFIG,config)
-
         return when (item.itemId) {
             R.id.action_settings -> {
                 //startActivity(Intent(this@MainActivity,AddActivity::class.java))
@@ -102,8 +99,24 @@ class MainActivity : AppCompatActivity(),SearchView.OnQueryTextListener {
                 return true
             }
             R.id.action_export ->{
+            R.id.action_import ->{
+                /*
+                val intent = Intent(this@MainActivity,DirectoryChooserActivity::class.java)
+                val config = DirectoryChooserConfig.builder()
+                    .newDirectoryName("MyNote")
+                    .allowReadOnlyDirectory(true)
+                    .allowNewDirectoryNameModification(true)
+                    .build()
 
                 startActivityForResult(intent,DIRECTORY_EXPORT)
+                intent.putExtra(DirectoryChooserActivity.EXTRA_CONFIG,config)
+
+                startActivityForResult(intent,REQUEST_DIRECTORY)
+                //Toast.makeText(this,getListFile(),Toast.LENGTH_LONG).show()
+                */
+
+                openFileDialog.show(getSupportFragmentManager(),"OpenFile")
+
                 return true
             }
 
@@ -126,35 +139,27 @@ class MainActivity : AppCompatActivity(),SearchView.OnQueryTextListener {
         Log.d("MYTAG","onActivityresult")
         Log.d("MYTAG","request_code="+requestCode.toString())
 
-        when(requestCode) {
-            DIRECTORY_EXPORT -> {
-                Log.d("MYTAG","request_code"+requestCode.toString())
-                if (resultCode == DirectoryChooserActivity.RESULT_CODE_DIR_SELECTED) {
-                    pathForBackup = data!!.getStringExtra(DirectoryChooserActivity.RESULT_SELECTED_DIR)
-                    Log.d("MYTAG",this.getDir(Environment.DIRECTORY_PICTURES, Context.MODE_PRIVATE).path)
-                    Log.d("MYTAG",pathForBackup)
-
-                    if (myBackup( this.getDir(Environment.DIRECTORY_PICTURES, Context.MODE_PRIVATE).path, pathForBackup))
-                        Log.d("MYTAG","copy OK")
-                } else {
-                    // Nothing selected
-                }
-            }
-            DIRECTORY_IMPORT -> {
-                Toast.makeText(this,"Toast",Toast.LENGTH_LONG).show()
+        if (requestCode == REQUEST_DIRECTORY){
+            Log.d("MYTAG","request_code"+requestCode.toString())
+            if (resultCode == DirectoryChooserActivity.RESULT_CODE_DIR_SELECTED) {
+                pathForBackup = data!!.getStringExtra(DirectoryChooserActivity.RESULT_SELECTED_DIR)
+                Log.d("MYTAG",this.getDir(Environment.DIRECTORY_PICTURES, Context.MODE_PRIVATE).path)
+                Log.d("MYTAG",pathForBackup)
+                myBackup( this.getDir(Environment.DIRECTORY_PICTURES, Context.MODE_PRIVATE).path,
+                    pathForBackup)
+            } else {
+                // Nothing selected
             }
         }
     }
     fun myBackup(oldPath:String,newPath:String):Boolean{
         val old = File(oldPath)
         val new = File(newPath)
-        val data = File(newPath+"/backup")
-        data.writeText(RealmHelper.exportRealmToJson(realm))
-
-        return old.copyRecursively(new,true)
+        if (clearBackupDir(new))
+            return old.copyRecursively(new)
+        else
+            return false
     }
-
-
     fun clearBackupDir(dir:File):Boolean{
         try {
             for(tempFile in dir.listFiles()){

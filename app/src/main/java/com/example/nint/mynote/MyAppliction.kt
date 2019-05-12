@@ -1,7 +1,11 @@
 package com.example.nint.mynote
 
-import android.app.*
+import android.app.Application
 import android.content.Context
+import android.net.Uri
+import android.os.Environment
+import android.text.format.DateUtils
+import com.example.nint.mynote.model.ItemRecyclerView
 import android.content.Intent
 import android.graphics.Bitmap
 import android.net.Uri

@@ -2,9 +2,12 @@ package com.example.nint.mynote.ui
 
 import android.app.Activity
 import android.app.DatePickerDialog
+import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
+import android.os.Environment
+import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 import android.view.Menu
 import android.view.MenuItem
@@ -20,6 +23,9 @@ import io.realm.Realm
 import kotlinx.android.synthetic.main.activity_add.*
 import java.util.*
 
+
+
+
 class AddActivity: AppCompatActivity() {
 
     private lateinit var realm: Realm
@@ -33,7 +39,8 @@ class AddActivity: AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_add)
         iv_avatar.setOnClickListener {
-           CropImage.activity(null)
+           CropImage.activity(null)//Uri.parse("/img/$itemID.jpg")
+               .setOutputUri(getImagePath(itemID))
                .setCropShape(CropImageView.CropShape.OVAL)
                .setFixAspectRatio(true)
                .setGuidelines(CropImageView.Guidelines.ON)
@@ -49,13 +56,16 @@ class AddActivity: AppCompatActivity() {
 
         if (!itemID.equals("NEW")) {
             supportActionBar?.title = "Редактировать именниника"
-                item = RealmHelper.readToRealm(realm, itemID)
+            item = RealmHelper.readToRealm(realm, itemID)
             avatarURI = item.avatar
             dateBorn.timeInMillis = item?.date
             et_name.setText(item?.name)
             et_date.setText(dateToStr(dateBorn.timeInMillis))
             et_note.setText(item?.note)
-            iv_avatar.setImageURI(Uri.parse(avatarURI))
+            if (avatarURI == "")
+                iv_avatar.setImageResource(R.mipmap.avatar)
+            else
+                iv_avatar.setImageURI(Uri.parse(avatarURI))
         }else{
             supportActionBar?.title = "Добавить именниника"
             isNew = true
@@ -73,8 +83,8 @@ class AddActivity: AppCompatActivity() {
         if (requestCode == CropImage.CROP_IMAGE_ACTIVITY_REQUEST_CODE) {
             val result = CropImage.getActivityResult(data)
             if (resultCode == Activity.RESULT_OK) {
-                avatarURI = result.uri.toString()
                 iv_avatar.setImageURI(result.uri)
+                avatarURI = result.uri.toString()
             } else if (resultCode == CropImage.CROP_IMAGE_ACTIVITY_RESULT_ERROR_CODE) {
                 Toast.makeText(this, "Cropping failed: " + result.error, Toast.LENGTH_LONG).show()
             }
@@ -95,17 +105,20 @@ class AddActivity: AppCompatActivity() {
         when(id){
             R.id.action_save ->{
                 try {
-                    var item = Item()
+                    item = Item()
                     item.id = itemID
                     item.date = strDateToLong(et_date.text.toString())
                     item.name = et_name.text.toString()
                     item.note = et_note.text.toString()
                     item.nameInsensitive = item.name.toUpperCase()
                     item.avatar = avatarURI
+
                     if (isNew){
                         RealmHelper.saveToRealm(realm,item)
+                        Log.d("MYTAG","save to realm")
                     }else{
                         RealmHelper.editToRealm(realm,item)
+                        Log.d("MYTAG","edit to realm")
                     }
                     Toast.makeText(this,getString(R.string.save),Toast.LENGTH_SHORT).show()
                     finish()
@@ -116,6 +129,13 @@ class AddActivity: AppCompatActivity() {
         }
         return super.onOptionsItemSelected(itemMenu)
     }
+
+
+    fun getImagePath(id:String):Uri{
+        var dir = this.getDir(Environment.DIRECTORY_PICTURES, Context.MODE_PRIVATE)
+        return Uri.parse("file://"+dir.path+"/"+id+".jpg")
+    }
+
 
     private fun setDateBorn() {
         var date = DatePickerDialog.OnDateSetListener { view, year, monthOfYear, dayOfMonth ->
@@ -131,5 +151,7 @@ class AddActivity: AppCompatActivity() {
             dateBorn.get(Calendar.DAY_OF_MONTH)
         ).show()
     }
+
+
 
 }
